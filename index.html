@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>WebAR Buku Interaktif — MindAR</title>
+  <meta name="theme-color" content="#0d1926" />
+  <!-- A-Frame dan MindAR memakai URL versi dari dokumentasi resminya. -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; font-family: Arial, sans-serif; background: #0d1926; }
+    .ar-container { position: fixed; inset: 0; overflow: hidden; }
+    .ar-container a-scene { display: block; width: 100%; height: 100%; }
+    .top-panel { position: fixed; z-index: 10; top: max(14px, env(safe-area-inset-top)); left: 14px; right: 14px; padding: 14px 16px; background: rgba(10,22,35,.82); color: white; border: 1px solid rgba(255,255,255,.15); border-radius: 16px; pointer-events: none; }
+    .eyebrow { display: block; font-size: 11px; letter-spacing: .13em; text-transform: uppercase; opacity: .7; margin-bottom: 7px; }
+    #status { font-size: 14px; line-height: 1.4; font-weight: 600; }
+    .bottom-panel { position: fixed; z-index: 10; bottom: max(18px, env(safe-area-inset-bottom)); left: 14px; right: 14px; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+    .bottom-panel a { text-decoration: none; background: rgba(10,22,35,.85); color: white; padding: 12px 14px; font-size: 13px; border: 1px solid rgba(255,255,255,.2); border-radius: 100px; }
+    .bottom-panel small { color: white; background: rgba(10,22,35,.7); border-radius: 999px; padding: 8px 10px; }
+  </style>
+</head>
+<body>
+  <!--
+  MODE DEMO: gambar target resmi MindAR untuk memastikan AR berhasil.
+  MODE BUKU LU: GANTI nilai imageTargetSrc di bawah menjadi ./targets.mind
+  setelah mengompilasi gambar halaman buku melalui compiler MindAR.
+  -->
+  <div class="ar-container">
+    <a-scene
+      mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind; autoStart: true;"
+      embedded
+      color-space="sRGB"
+      renderer="colorManagement: true"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false">
+      <a-assets timeout="20000">
+        <a-asset-item id="model3d" src="./assets/planet.glb"></a-asset-item>
+      </a-assets>
+      <a-entity light="type: ambient; color: #ffffff; intensity: 1.5"></a-entity>
+      <a-entity light="type: directional; color: #ffffff; intensity: 1.4" position="-1 2 3"></a-entity>
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-entity id="image-anchor" mindar-image-target="targetIndex: 0">
+        <!-- Objek GLB menempel pada gambar target dan berada sedikit di atas permukaannya. -->
+        <a-gltf-model
+          src="#model3d"
+          position="0 0 0.22"
+          scale="0.78 0.78 0.78"
+          animation="property: rotation; from: -12 0 0; to: -12 360 0; dur: 18000; easing: linear; loop: true">
+        </a-gltf-model>
+      </a-entity>
+    </a-scene>
+  </div>
+
+  <div class="top-panel" role="status" aria-live="polite">
+    <span class="eyebrow">WebAR · Buku Interaktif</span>
+    <div id="status">Izinkan kamera, lalu arahkan ke gambar target.</div>
+  </div>
+  <div class="bottom-panel">
+    <a href="./target-demo.html" target="_blank" rel="noopener noreferrer">Lihat gambar uji</a>
+    <small>MindAR + A-Frame</small>
+  </div>
+  <script>
+    // UI sederhana untuk mengetahui apakah target gambar sedang terdeteksi.
+    document.addEventListener('DOMContentLoaded', () => {
+      const anchor = document.getElementById('image-anchor');
+      const status = document.getElementById('status');
+      anchor.addEventListener('targetFound', () => {
+        status.textContent = 'Berhasil! Objek 3D muncul. Coba gerakkan kamera perlahan.';
+      });
+      anchor.addEventListener('targetLost', () => {
+        status.textContent = 'Gambar belum terdeteksi. Arahkan kamera ke gambar target.';
+      });
+    });
+  </script>
+</body>
+</html>
